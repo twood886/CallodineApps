@@ -9,7 +9,7 @@
 runIntradayPerformance <- function() {
   appDir <- system.file("shiny-apps", "CCMF_IntraDayPerformance", package = "CallodineApps")
   if (appDir == "") {
-    stop("Could not find example directory. Try re-installing `Callodine_Apps`.", call. = FALSE)
+    stop("Could not find example directory. Try re-installing `CallodineApps`.", call. = FALSE)
   }
 
   shiny::runApp(appDir, display.mode = "normal")
