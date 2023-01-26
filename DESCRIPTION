@@ -4,6 +4,7 @@ Title: Callodine Shiny Apps
 Version: 0.0.0.9000
 Author: Taylor Wood
 Maintainer: Taylor Wood <twood@callodine.com>
+Depends: tidyverse, shiny, readxl, zoo, scales
 Description: Collection of Callodine Shiny Apps for Employees
 License: What license is it under?
 Encoding: UTF-8
