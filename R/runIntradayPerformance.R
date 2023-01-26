@@ -7,7 +7,7 @@
 #' @import scales
 #' @export
 runIntradayPerformance <- function() {
-  appDir <- system.file("shiny-apps", "CCMF_IntraDayPerformance", package = "Callodine_Apps")
+  appDir <- system.file("shiny-apps", "CCMF_IntraDayPerformance", package = "CallodineApps")
   if (appDir == "") {
     stop("Could not find example directory. Try re-installing `Callodine_Apps`.", call. = FALSE)
   }
