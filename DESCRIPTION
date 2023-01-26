@@ -1,0 +1,11 @@
+Package: CallodineApps
+Type: Package
+Title: Callodine Shiny Apps
+Version: 0.0.0.9000
+Author: Taylor Wood
+Maintainer: twood@callodine.com
+Description: Collection of Callodine Shiny Apps for Employees
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.2.1
