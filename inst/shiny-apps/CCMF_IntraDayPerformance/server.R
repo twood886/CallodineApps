@@ -19,6 +19,8 @@ library(lubridate)
 
 
 get_history_v2 <- function(symbol, period = "1d", interval = "1m", start = NULL, end = NULL) {
+  symbol <- str_remove_all(symbol,"/")
+  symbol <- str_remove_all(symbol," ")
 
   if (!is.null(start)) {
     start_date <- as.numeric(as.POSIXct(ymd(start)))
@@ -44,7 +46,7 @@ get_history_v2 <- function(symbol, period = "1d", interval = "1m", start = NULL,
 
   resp <- httr::GET(url, query = qlist)
 
-  if(resp$status_code == 400){
+  if(resp$status_code != 200){
     return(data.frame(
       date = as.POSIXct(NULL),
       #volume = NULL,
@@ -146,8 +148,7 @@ get_holdings <- function(
     `Option Type` =
       case_when(
         `Option Type` == "Call" ~ "C",
-        `Option Type` == "Put" ~ "P",
-        TRUE ~ NA),
+        `Option Type` == "Put" ~ "P"),
     `Ticker` =
       case_when(
         `Instrument Type` == "Listed Option" ~
