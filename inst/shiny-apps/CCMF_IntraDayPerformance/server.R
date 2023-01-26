@@ -12,6 +12,9 @@ library(tidyverse)
 library(readxl)
 library(zoo)
 library(scales)
+library(magrittr)
+library(httr)
+library(jsonlite)
 
 get_history_v2 <- function(symbol, period = "1d", interval = "1m", start = NULL, end = NULL) {
 

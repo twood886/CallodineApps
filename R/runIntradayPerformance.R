@@ -5,6 +5,9 @@
 #' @import readxl
 #' @import zoo
 #' @import scales
+#' @import magrittr
+#' @import httr
+#' @import jsonlite
 #' @export
 runIntradayPerformance <- function() {
   appDir <- system.file("shiny-apps", "CCMF_IntraDayPerformance", package = "CallodineApps")
