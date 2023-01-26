@@ -15,6 +15,7 @@ library(scales)
 library(magrittr)
 library(httr)
 library(jsonlite)
+library(lubridate)
 
 get_history_v2 <- function(symbol, period = "1d", interval = "1m", start = NULL, end = NULL) {
 

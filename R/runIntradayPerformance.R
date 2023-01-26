@@ -8,6 +8,7 @@
 #' @import magrittr
 #' @import httr
 #' @import jsonlite
+#' @import lubridate
 #' @export
 runIntradayPerformance <- function() {
   appDir <- system.file("shiny-apps", "CCMF_IntraDayPerformance", package = "CallodineApps")
