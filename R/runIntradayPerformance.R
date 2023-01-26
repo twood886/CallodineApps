@@ -2,7 +2,6 @@
 #' @description Runs application to display intraday performance of CCMF
 #' @import tidyverse
 #' @import shiny
-#' @import yahoofinancer
 #' @import readxl
 #' @import zoo
 #' @import scales

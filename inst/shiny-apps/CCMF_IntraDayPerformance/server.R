@@ -9,7 +9,6 @@
 
 library(shiny)
 library(tidyverse)
-library(yahoofinancer)
 library(readxl)
 library(zoo)
 library(scales)
