@@ -73,7 +73,7 @@ get_history_v2 <- function(symbol, period = "1d", interval = "1m", start = NULL,
   # }
 
   result <- data.frame(
-    date =  with_tz(as_datetime(unlist(data$timestamp)), tz="EST"),
+    date =  lubridate::with_tz(as_datetime(unlist(data$timestamp)), tz="EST"),
     #volume = na.locf(unlist(as.numeric(as.character(indicators$volume)))),
     #high = na.locf(unlist(as.numeric(as.character(indicators$high)))),
     #low = na.locf(unlist(as.numeric(as.character(indicators$low)))),
