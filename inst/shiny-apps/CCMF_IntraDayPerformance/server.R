@@ -135,7 +135,7 @@ validate_symbol <- function(symbol = NULL) {
 }
 
 get_holdings <- function(
-    fileloc = "C:/Users/TWood.callodine/Callodine Capital Management, LP/Main - Documents/TWOOD-Bloomberg/Daily_Trade_Report/Daily_Trade_Report_Macro.xlsm",
+    fileloc = "./Daily_Trade_Report/Daily_Trade_Report_Macro.xlsm",
     sheet = "Holdings",
     skip = 10){
 
