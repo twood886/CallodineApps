@@ -283,6 +283,7 @@ shinyServer(function(input, output, session) {
       fill(everything(), .direction = "down") %>%
       filter(`date` == max(`date`)) %>%
       mutate(`L/S` = ifelse(`NMV.start` > 0, "Long", "Short")) %>%
+      mutate(`contr` = `contr` * 10000) %>%
       group_by(`sector`, `L/S`) %>%
       summarise(`contr` = sum(`contr`, na.rm = T)) %>%
       pivot_wider(names_from = `L/S`, values_from = `contr`) %>%
@@ -292,13 +293,12 @@ shinyServer(function(input, output, session) {
       gt() %>%
       tab_header(
         title = "Sector L/S Contribution to Intraday Return (bps)") %>%
-      fmt_number(columns = c(`Long`, `Short`, `Total`), scale_by = 10000, decimals = 0) %>%
+      fmt_number(columns = c(`Long`, `Short`, `Total`), decimals = 0) %>%
       grand_summary_rows(
         columns = c(`Long`, `Short`, `Total`),
         fns = list(`Total` = ~sum(na.rm = T)),
         formatter = fmt_number,
-        decimals = 0,
-        scale_by = 10000) %>%
+        decimals = 0) %>%
       gt_theme_538()
   })
 
