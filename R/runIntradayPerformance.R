@@ -1,6 +1,6 @@
 #' @title CCMF Intraday Performance Shiny App
 #' @description Runs application to display intraday performance of CCMF
-#' @import tidyverse
+#' @import gt
 #' @import shiny
 #' @import readxl
 #' @import zoo
@@ -9,6 +9,7 @@
 #' @import httr
 #' @import jsonlite
 #' @import lubridate
+#' @import tidyverse
 #' @export
 runIntradayPerformance <- function() {
   appDir <- system.file("shiny-apps", "CCMF_IntraDayPerformance", package = "CallodineApps")
