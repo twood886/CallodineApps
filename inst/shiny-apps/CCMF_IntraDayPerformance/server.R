@@ -274,7 +274,7 @@ shinyServer(function(input, output, session) {
       scale_y_continuous(labels = scales::percent)
     })
 
-  output$TableLS <- render_gt({
+  output$TableLS <- gt::render_gt({
     data.returns() %>%
       select(`sector`,`NMV.start`, `return.intraday`) %>%
       unnest(cols = c(`symbol.yahoo`, `sector`, `NMV.start`, `return.intraday`)) %>%

@@ -18,7 +18,7 @@ shinyUI(fluidPage(
     # Show a plot of the generated distribution
     fluidRow(
         column(6, align="center", plotOutput("Plot")),
-        column(6, align="center", gt_output("TableLS"))
+        column(6, align="center", gt::gt_output("TableLS"))
     )
 
 
