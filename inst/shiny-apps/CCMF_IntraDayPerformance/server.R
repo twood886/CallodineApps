@@ -17,7 +17,7 @@ library(httr)
 library(jsonlite)
 library(lubridate)
 library(gt)
-
+library(shinydashboard)
 
 get_history_v2 <- function(symbol, period = "1d", interval = "1m", start = NULL, end = NULL) {
   symbol <- str_remove_all(symbol,"/")
@@ -292,8 +292,6 @@ shinyServer(function(input, output, session) {
       mutate(`Total` = sum(`Long`, `Short`, na.rm=T)) %>%
       rename(`Sector` = `sector`) %>%
       gt() %>%
-      tab_header(
-        title = "Sector L/S Contribution to Intraday Return (bps)") %>%
       fmt_number(columns = c(`Long`, `Short`, `Total`), decimals = 0) %>%
       grand_summary_rows(
         columns = c(`Long`, `Short`, `Total`),

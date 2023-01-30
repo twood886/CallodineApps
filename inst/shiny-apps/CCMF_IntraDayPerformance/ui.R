@@ -8,17 +8,23 @@
 #
 
 library(shiny)
+library(shinydashboard)
 
 # Define UI for application that draws a histogram
-shinyUI(fluidPage(
+shinyUI(
 
-    # Application title
-    titlePanel("Callodine Capital Master Fund Intra-Day Performance"),
-
-    # Show a plot of the generated distribution
-    fluidRow(
-        column(6, align="center", plotOutput("Plot")),
-        column(6, align="center", gt::gt_output("TableLS"))
+  dashboardPage(
+    dashboardHeader(title = "Callodine Capital Master Fund Intra-Day Performance"),
+    dashboardSidebar(),
+    dashboardBody(
+      fluidRow(
+          box(
+            title = "Intra-Day Performance Chart",
+            plotOutput("Plot")),
+          box(
+            title = "Sector L/S Contribution Table",
+            gt::gt_output("TableLS"))
+      )
     )
 
 
