@@ -288,6 +288,7 @@ shinyServer(function(input, output, session) {
       summarise(`contr` = sum(`contr`, na.rm = T)) %>%
       pivot_wider(names_from = `L/S`, values_from = `contr`) %>%
       ungroup() %>%
+      rowwise() %>%
       mutate(`Total` = sum(`Long`, `Short`, na.rm=T)) %>%
       rename(`Sector` = `sector`) %>%
       gt() %>%
@@ -296,7 +297,7 @@ shinyServer(function(input, output, session) {
       fmt_number(columns = c(`Long`, `Short`, `Total`), decimals = 0) %>%
       grand_summary_rows(
         columns = c(`Long`, `Short`, `Total`),
-        fns = list(`Total` = ~sum(na.rm = T)),
+        fns = list(`Total` = ~sum(., na.rm = T)),
         formatter = fmt_number,
         decimals = 0) %>%
       gt_theme_538()
