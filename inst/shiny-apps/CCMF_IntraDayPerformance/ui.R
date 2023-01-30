@@ -16,8 +16,9 @@ shinyUI(fluidPage(
     titlePanel("Callodine Capital Master Fund Intra-Day Performance"),
 
     # Show a plot of the generated distribution
-    mainPanel(
-      plotOutput("Plot")
+    fluidRow(
+        column(6, align="center", plotOutput("Plot")),
+        column(6, align="center", gt_output("TableLS"))
     )
 
 

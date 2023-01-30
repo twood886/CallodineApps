@@ -16,30 +16,25 @@ library(magrittr)
 library(httr)
 library(jsonlite)
 library(lubridate)
+library(gt)
 
 
 get_history_v2 <- function(symbol, period = "1d", interval = "1m", start = NULL, end = NULL) {
   symbol <- str_remove_all(symbol,"/")
   symbol <- str_remove_all(symbol," ")
 
-  if (!is.null(start)) {
-    start_date <- as.numeric(as.POSIXct(ymd(start)))
-  }
+  if (!is.null(start)) {start_date <- as.numeric(as.POSIXct(ymd(start)))}
 
-  if (!is.null(end)) {
-    end_date <- as.numeric(as.POSIXct(ymd(end)))
-  }
+  if (!is.null(end)) {end_date <- as.numeric(as.POSIXct(ymd(end)))}
 
   path <- "v8/finance/chart/"
   end_point <- paste0(path, symbol)
   url <- httr::modify_url(url = 'https://query1.finance.yahoo.com', path = end_point)
 
   if (!is.null(start) && !is.null(end)) {
-    qlist <- list(period1 = start_date, period2 = end_date,
-                  interval = interval)
+    qlist <- list(period1 = start_date, period2 = end_date, interval = interval)
   }else if (!is.null(start) && is.null(end)) {
-    qlist <- list(period1 = start_date, period2 = round(as.numeric(as.POSIXct(now()))),
-                  interval = interval)
+    qlist <- list(period1 = start_date, period2 = round(as.numeric(as.POSIXct(now()))), interval = interval)
   }else {
     qlist <- list(range = period, interval = interval)
   }
@@ -56,7 +51,6 @@ get_history_v2 <- function(symbol, period = "1d", interval = "1m", start = NULL,
       close = as.numeric(NULL)))}
 
   parsed <- jsonlite::fromJSON(httr::content(resp, "text", encoding = "UTF-8"), simplifyVector = FALSE)
-
   data <-
     parsed %>%
     magrittr::use_series(chart) %>%
@@ -81,7 +75,7 @@ get_history_v2 <- function(symbol, period = "1d", interval = "1m", start = NULL,
     #high = na.locf(unlist(as.numeric(as.character(indicators$high)))),
     #low = na.locf(unlist(as.numeric(as.character(indicators$low)))),
     #open = na.locf(unlist(as.numeric(as.character(indicators$open)))),
-    close = na.locf(unlist(as.numeric(as.character(indicators$close)))))
+    close = suppressWarnings(na.locf(unlist(as.numeric(as.character(indicators$close))))))
 
 
   intervals <- c("1d", "5d", "1wk", "1mo", "3mo")
@@ -167,7 +161,6 @@ get_holdings <- function(
   unnest(`symbol.yahoo`)
 }
 
-
 calc_returns <- function(data.holdings){
 
   data.holdings %>%
@@ -177,7 +170,7 @@ calc_returns <- function(data.holdings){
       `sector` = map_chr(`data`, \(x) first(x$`GIC Sector`)),
       `quantity` = map_dbl(`data`, \(x) sum(x$Quantity)),
       `price.start` = map_dbl(`data`, \(x) first(x$`Fair Value`)),
-      `NMV.start` = map_dbl(`data`, \(x) sum(x$`Fair Value`)),
+      `NMV.start` = map_dbl(`data`, \(x) sum(x$`$ NMV`)),
       `NAV.start` = map_dbl(`data`, \(x) first(x$`Selected GLs SOD NAV`)),
       `price.intraday` = map(`symbol.yahoo`, get_history_v2),
       `price.intraday` = map2(
@@ -199,14 +192,50 @@ calc_returns <- function(data.holdings){
             `contr` = `gl` / .d) %>%
           select(`date`, `return`, `gl`, `contr`)))
 }
-
+gt_theme_538 <- function(data,...) {
+  data %>%
+    opt_all_caps()  %>%
+    opt_table_font(
+      font = list(
+        google_font("Chivo"),
+        default_fonts()
+      )
+    ) %>%
+    tab_style(
+      style = cell_borders(
+        sides = "bottom", color = "transparent", weight = px(2)
+      ),
+      locations = cells_body(
+        columns = TRUE,
+        # This is a relatively sneaky way of changing the bottom border
+        # Regardless of data size
+        rows = nrow(data$`_data`)
+      )
+    )  %>%
+    tab_options(
+      column_labels.background.color = "white",
+      table.border.top.width = px(3),
+      table.border.top.color = "transparent",
+      table.border.bottom.color = "transparent",
+      table.border.bottom.width = px(3),
+      column_labels.border.top.width = px(3),
+      column_labels.border.top.color = "transparent",
+      column_labels.border.bottom.width = px(3),
+      column_labels.border.bottom.color = "black",
+      data_row.padding = px(3),
+      source_notes.font.size = 12,
+      table.font.size = 16,
+      heading.align = "left",
+      ...
+    )
+}
 
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output, session) {
 
   # Set Timer for Auto Data Updates
-  timer.min <- reactiveTimer(60000)
+  timer.min <- reactiveTimer(120000)
   timer.10min <- reactiveTimer(600000)
 
   # Import Holdings
@@ -244,6 +273,34 @@ shinyServer(function(input, output, session) {
       theme_minimal() +
       scale_y_continuous(labels = scales::percent)
     })
+
+  output$TableLS <- render_gt({
+    data.returns() %>%
+      select(`sector`,`NMV.start`, `return.intraday`) %>%
+      unnest(cols = c(`symbol.yahoo`, `sector`, `NMV.start`, `return.intraday`)) %>%
+      ungroup() %>%
+      complete(`symbol.yahoo`, `date`) %>%
+      fill(everything(), .direction = "down") %>%
+      filter(`date` == max(`date`)) %>%
+      mutate(`L/S` = ifelse(`NMV.start` > 0, "Long", "Short")) %>%
+      group_by(`sector`, `L/S`) %>%
+      summarise(`contr` = sum(`contr`, na.rm = T)) %>%
+      pivot_wider(names_from = `L/S`, values_from = `contr`) %>%
+      ungroup() %>%
+      mutate(`Total` = sum(`Long`, `Short`, na.rm=T)) %>%
+      rename(`Sector` = `sector`) %>%
+      gt() %>%
+      tab_header(
+        title = "Sector L/S Contribution to Intraday Return (bps)") %>%
+      fmt_number(columns = c(`Long`, `Short`, `Total`), scale_by = 10000, decimals = 0) %>%
+      grand_summary_rows(
+        columns = c(`Long`, `Short`, `Total`),
+        fns = list(`Total` = ~sum(na.rm = T)),
+        formatter = fmt_number,
+        decimals = 0,
+        scale_by = 10000) %>%
+      gt_theme_538()
+  })
 
 })
 
