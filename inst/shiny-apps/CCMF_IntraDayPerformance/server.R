@@ -7,6 +7,28 @@
 #    http://shiny.rstudio.com/
 #
 
+#list of packages required
+list.pack <- c(
+  "shiny",
+  "tidyverse",
+  "readxl",
+  "zoo",
+  "scales",
+  "magrittr",
+  "httr",
+  "jsonlite",
+  "lubridate",
+  "gt",
+  "shinydashboard")
+
+lapply(
+  list.pack,
+  function(x)
+    if(!require(x,character.only = TRUE)) install.packages(x))
+
+
+
+
 library(shiny)
 library(tidyverse)
 library(readxl)
@@ -18,6 +40,8 @@ library(jsonlite)
 library(lubridate)
 library(gt)
 library(shinydashboard)
+
+
 
 get_history_v2 <- function(symbol, period = "1d", interval = "1m", start = NULL, end = NULL) {
   symbol <- str_remove_all(symbol,"/")
@@ -285,7 +309,7 @@ shinyServer(function(input, output, session) {
       mutate(`L/S` = ifelse(`NMV.start` > 0, "Long", "Short")) %>%
       mutate(`contr` = `contr` * 10000) %>%
       group_by(`sector`, `L/S`) %>%
-      summarise(`contr` = sum(`contr`, na.rm = T)) %>%
+      summarise(`contr` = sum(`contr`, na.rm = T), .groups = ) %>%
       pivot_wider(names_from = `L/S`, values_from = `contr`) %>%
       ungroup() %>%
       rowwise() %>%

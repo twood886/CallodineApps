@@ -7,6 +7,15 @@
 #    http://shiny.rstudio.com/
 #
 
+list.pack <- c(
+  "shiny",
+  "shinydashboard")
+
+lapply(
+  list.pack,
+  function(x)
+    if(!require(x,character.only = TRUE)) install.packages(x))
+
 library(shiny)
 library(shinydashboard)
 
@@ -15,7 +24,7 @@ shinyUI(
 
   dashboardPage(
     dashboardHeader(title = "Callodine Capital Master Fund Intra-Day Performance"),
-    dashboardSidebar(),
+    dashboardSidebar(disable = TRUE),
     dashboardBody(
       fluidRow(
           box(
