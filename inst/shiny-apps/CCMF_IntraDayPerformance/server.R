@@ -21,12 +21,10 @@ list.pack <- c(
   "gt",
   "shinydashboard")
 
-lapply(
-  list.pack,
-  function(x)
-    if(!require(x,character.only = TRUE)) install.packages(x))
+new.packages <- list.pack[!(list.pack %in% installed.packages()[,"Package"])]
 
-
+#install missing ones
+if(length(new.packages)) install.packages(new.packages, dependencies = TRUE)
 
 
 library(shiny)
@@ -40,7 +38,6 @@ library(jsonlite)
 library(lubridate)
 library(gt)
 library(shinydashboard)
-
 
 
 get_history_v2 <- function(symbol, period = "1d", interval = "1m", start = NULL, end = NULL) {

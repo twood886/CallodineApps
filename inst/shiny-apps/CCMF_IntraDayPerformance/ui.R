@@ -9,7 +9,21 @@
 
 list.pack <- c(
   "shiny",
+  "tidyverse",
+  "readxl",
+  "zoo",
+  "scales",
+  "magrittr",
+  "httr",
+  "jsonlite",
+  "lubridate",
+  "gt",
   "shinydashboard")
+
+new.packages <- list.pack[!(list.pack %in% installed.packages()[,"Package"])]
+
+#install missing ones
+if(length(new.packages)) install.packages(new.packages, dependencies = TRUE)
 
 lapply(
   list.pack,
