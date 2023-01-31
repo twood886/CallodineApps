@@ -10,6 +10,7 @@
 #' @import jsonlite
 #' @import lubridate
 #' @import tidyverse
+#' @import shinydashboard
 #' @export
 runIntradayPerformance <- function() {
   appDir <- system.file("shiny-apps", "CCMF_IntraDayPerformance", package = "CallodineApps")
