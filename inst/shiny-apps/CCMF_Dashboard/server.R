@@ -7,8 +7,8 @@ library(gtExtras)
 library(extrafont)
 library(plotly)
 
-#source("Functions.R")
-#source("Functions_Intraday.R")
+source("Functions.R")
+source("Functions_Intraday.R")
 
 .tq_get_return <- function(x, get = "stock.prices", complete_cases = T, from, to){
   tq_get(
