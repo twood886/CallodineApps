@@ -36,10 +36,11 @@ shinyServer(function(input, output, session) {
     timer.10min()
     get_holdings()})
 
+
   # Calculate Returns every 2 Min for Intra-day
   data.returns <- reactive({
     timer.min()
-    calc_returns(data.holdings())})
+    calcReturnsIntraday(data.holdings())})
 
   # Generate Plot for Intra-day Return
   output$idayPlot <- renderPlotly({
