@@ -34,8 +34,7 @@ shinyServer(function(input, output, session) {
   # Import Holdings for Intra-day
   data.holdings <- reactive({
     timer.10min()
-    get_holdings()})
-
+    getCCMFholdings()})
 
   # Calculate Returns every 2 Min for Intra-day
   data.returns <- reactive({
