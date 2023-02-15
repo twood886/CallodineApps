@@ -25,7 +25,6 @@ source("Functions_Intraday.R")
 
 shinyServer(function(input, output, session) {
 
-
   ##### Intra-day Module
   # Set Timer for Auto Data Updates
   timer.min <- reactiveTimer(120000)

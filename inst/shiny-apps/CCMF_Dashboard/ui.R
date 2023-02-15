@@ -1,27 +1,37 @@
-library(shiny)
-library(shinydashboard)
-library(plotly)
+list.pack <- c(
+  "shiny",
+  "plotly",
+  "tidyverse",
+  "readxl",
+  "zoo",
+  "scales",
+  "magrittr",
+  "httr",
+  "jsonlite",
+  "lubridate",
+  "gt",
+  "shinydashboard",
+  "gtExtras")
+
+new.packages <- list.pack[!(list.pack %in% installed.packages()[,"Package"])]
+
+if(length(new.packages)) install.packages(new.packages, dependencies = TRUE)
+
+lapply(
+  list.pack,
+  function(x)
+    if(!require(x,character.only = TRUE)) install.packages(x))
+
+library(tidyverse)
 library(lubridate)
 library(gt)
-
-
-
-# list.pack <- c(
-#   "shiny",
-#   "tidyverse",
-#   "readxl",
-#   "zoo",
-#   "scales",
-#   "magrittr",
-#   "httr",
-#   "jsonlite",
-#   "lubridate",
-#   "gt",
-#   "shinydashboard")
-#
-# new.packages <- list.pack[!(list.pack %in% installed.packages()[,"Package"])]
-
-
+library(shiny)
+library(gtExtras)
+library(extrafont)
+library(plotly)
+library(shinydashboard)
+library(lubridate)
+library(gt)
 
 
 # Define UI for application that draws a histogram
