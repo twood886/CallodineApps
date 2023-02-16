@@ -2,15 +2,15 @@ library(tidyverse)
 library(lubridate)
 library(gt)
 library(shiny)
-library(tidyquant)
 library(gtExtras)
 library(plotly)
+library(tidyquant)
 
 source("Functions.R")
 source("Functions_Intraday.R")
 
 .tq_get_return <- function(x, get = "stock.prices", complete_cases = T, from, to){
-  tq_get(
+  tidyquant::tq_get(
     x = x,
     get = get,
     complete_cases = complete_cases,

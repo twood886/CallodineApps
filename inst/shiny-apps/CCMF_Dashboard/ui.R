@@ -11,7 +11,8 @@ list.pack <- c(
   "lubridate",
   "gt",
   "shinydashboard",
-  "gtExtras")
+  "gtExtras",
+  "tidyquant")
 
 new.packages <- list.pack[!(list.pack %in% installed.packages()[,"Package"])]
 
@@ -31,6 +32,7 @@ library(plotly)
 library(shinydashboard)
 library(lubridate)
 library(gt)
+library(tidyquant)
 
 
 # Define UI for application that draws a histogram
