@@ -4,7 +4,6 @@ library(gt)
 library(shiny)
 library(tidyquant)
 library(gtExtras)
-library(extrafont)
 library(plotly)
 
 source("Functions.R")
@@ -166,7 +165,7 @@ shinyServer(function(input, output, session) {
 
   #####
   # Summary Table
-  output$tableSummary <- gt::render_gt({
+  data.tableSummary <- reactive({
     full_join(
       data.portreturn()$summary %>%
         pivot_longer(
@@ -181,7 +180,15 @@ shinyServer(function(input, output, session) {
         pivot_wider(
           names_from = `L/S Exp`,
           values_from = `value`),
-      by = "metric") %>%
+      by = "metric")})
+
+  output$downloadtableSummary <- downloadHandler(
+    filename = function(){"summarytable.csv"},
+    content = function(fname){
+      write.csv(data.tableSummary(), fname)})
+
+  output$tableSummary <- gt::render_gt({
+    data.tableSummary() %>%
       gt() %>%
       fmt_currency(
         columns = c(everything(), -`metric`),
@@ -429,6 +436,8 @@ shinyServer(function(input, output, session) {
         mode = "lines",
         line = list(color = "rgb(0,47,86)")) %>%
       layout(
+        xaxis = list(
+          title = ""),
         yaxis = list(
           title = "Gross Exposure",
           overlaying = "y",
@@ -454,6 +463,8 @@ shinyServer(function(input, output, session) {
         mode = "lines",
         line = list(color = "rgb(44,132,134)")) %>%
       layout(
+        xaxis = list(
+          title = ""),
         yaxis = list(
           title = "Net Exposure",
           overlaying = "y",
@@ -468,13 +479,4 @@ shinyServer(function(input, output, session) {
           y = 100,
           automargin = T))})
 
-
-
-
 })
-
-
-
-
-
-

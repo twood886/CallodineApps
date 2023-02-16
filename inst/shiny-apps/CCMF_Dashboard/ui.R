@@ -90,6 +90,7 @@ shinyUI(
         tabItem(
           tabName = "intraday",
           h2("Intraday Return Summary"),
+
           fluidRow(
             box(
               title = "Intra-Day Return Chart",
@@ -103,9 +104,11 @@ shinyUI(
         tabItem(
           tabName = "psummary",
           h2("Performance Summary"),
+
           fluidRow(
             box(
               title = "Summary Metrics",
+              downloadButton('downloadtableSummary',"Download"),
               gt_output("tableSummary"),
               width = 4),
             tabBox(
