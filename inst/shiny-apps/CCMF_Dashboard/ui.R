@@ -45,23 +45,6 @@ shinyUI(
       titleWidth = 450),
 
     dashboardSidebar(
-      dateRangeInput(
-        'dateRange',
-        label = "Select Date Range for Analysis:",
-        start = floor_date(Sys.Date()-1, 'year'),
-        end = Sys.Date()-1,
-        separator = " to ",
-        format = "mm/dd/yyyy",
-        startview = 'year',
-        weekstart = 0),
-
-
-      # Date Buttons
-      actionButton("buttonMTD", "Month to Date", style='padding:4px; font-size:80%'),
-      actionButton("button1M", "1 Month", style='padding:4px; font-size:80%'),
-      actionButton("buttonQTD", "Quarter to Date", style='padding:4px; font-size:80%'),
-      actionButton("button1Y", "1 Year", style='padding:4px; font-size:80%'),
-      actionButton("buttonITD", "Inception to Date", style='padding:4px; font-size:80%'),
 
       sidebarMenu(
         menuItem(
@@ -81,8 +64,13 @@ shinyUI(
           tabName = "exp",
           icon = icon("th"),
           badgeLabel = "new",
-          badgeColor = "green"
-        ))),
+          badgeColor = "green"),
+        menuItem(
+          "Sector Exposure",
+          tabName = "sectorexp",
+          icon = icon("th"),
+          badgeLabel = "new",
+          badgeColor = "green"))),
 
     dashboardBody(
 
@@ -95,22 +83,40 @@ shinyUI(
           fluidRow(
             box(
               title = "Intra-Day Return Chart",
-              plotlyOutput("idayPlot")
-              ),
+              plotlyOutput("idayPlot")),
             box(
               title = "Intra-day Sector L/S Contribution",
-              gt_output("idayTableLS")
-              ))),
+              gt_output("idayTableLS")))),
 
         tabItem(
           tabName = "psummary",
           h2("Performance Summary"),
-
+          fluidRow(
+            box(
+              width = 12,
+              height = 50,
+              column(
+                width = 3,
+                dateRangeInput(
+                  'dateRange.psum',
+                  label = NULL,
+                  start = floor_date(Sys.Date()-1, 'year'),
+                  end = Sys.Date()-1,
+                  separator = " to ",
+                  format = "mm/dd/yyyy",
+                  startview = 'year',
+                  weekstart = 0)),
+              actionButton("buttonMTD.psum", "Month to Date"),
+              actionButton("button1M.psum", "1 Month"),
+              actionButton("buttonQTD.psum", "Quarter to Date"),
+              actionButton("buttonYTD.psum", "Year to Date"),
+              actionButton("button1Y.psum", "1 Year"),
+              actionButton("buttonITD.psum", "Inception to Date"))),
           fluidRow(
             box(
               title = "Summary Metrics",
-              downloadButton('downloadtableSummary',"Download"),
               gt_output("tableSummary"),
+              downloadButton('downloadtableSummary',"Download"),
               width = 4),
             tabBox(
               title = "Performance Chart",
@@ -118,12 +124,11 @@ shinyUI(
               width = 8,
               tabPanel("Cumulative Return", plotlyOutput("chartCumRet")),
               tabPanel("Weekly Return", plotlyOutput("chartWeekReturn")),
-              tabPanel("Monthly Return", plotlyOutput("chartMonthReturn"))
-
-              #plotlyOutput("chartCumRet"),
-              )),
+              tabPanel("Monthly Return", plotlyOutput("chartMonthReturn")),
+              tabPanel("Annual Return", plotlyOutput("chartYearReturn")))),
           fluidRow(
             box(
+              width = 8,
               title = "Sector Metrics",
               gt_output("sectableSummary")))),
 
@@ -132,12 +137,44 @@ shinyUI(
           h2("Portfolio Exposure"),
           fluidRow(
             box(
+              width = 12,
+              height = 50,
+              column(
+                width = 3,
+                dateRangeInput(
+                  'dateRange.pexp',
+                  label = NULL,
+                  start = floor_date(Sys.Date()-1, 'year'),
+                  end = Sys.Date()-1,
+                  separator = " to ",
+                  format = "mm/dd/yyyy",
+                  startview = 'year',
+                  weekstart = 0)),
+              actionButton("buttonMTD.pexp", "Month to Date"),
+              actionButton("button1M.pexp", "1 Month"),
+              actionButton("buttonQTD.pexp", "Quarter to Date"),
+              actionButton("buttonYTD.pexp", "Year to Date"),
+              actionButton("button1Y.pexp", "1 Year"),
+              actionButton("buttonITD.pexp", "Inception to Date"))),
+          fluidRow(
+            box(
               title = "Gross Portfolio Exposure",
               plotlyOutput("chartGrossExp")),
             box(
               title = "Net Portfolio Exposure",
-              plotlyOutput("chartNetExp")))
-        )
+              plotlyOutput("chartNetExp")))),
+
+        tabItem(
+          tabName = "sectorexp",
+          h2("Sector Exposure"),
+          fluidRow(
+            box(
+              width = 12,
+              title = "Sector Exposure - Snapshot",
+              plotlyOutput("chartSectorWeightSnapshot"))))
+
+
       )
     )
 ))
+

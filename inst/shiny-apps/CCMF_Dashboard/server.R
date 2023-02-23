@@ -22,6 +22,17 @@ source("Functions_Intraday.R")
       `date` <= as.Date(to)) %>%
     mutate(`return.cumulative` = cumprod(1 + `return.daily`) - 1)}
 
+
+setDateButton <- function(x){
+  date.start <- case_when(
+    x == "MTD" ~ as.character(floor_date(Sys.Date() -1, "month")),
+    x == "1M" ~ as.character(floor_date((Sys.Date()-1) %m-% months(1) + 1)),
+    x == "QTD" ~ as.character(floor_date(Sys.Date()-1, "quarter")),
+    x == "YTD" ~ as.character(floor_date((Sys.Date()-1), "year")),
+    x == "1Y" ~ as.character(floor_date((Sys.Date() -1) %m-% years(1) + 1)),
+    x == "ITD" ~ as.character(as.Date("2018-07-02")))
+  return(as.Date(date.start))}
+
 shinyServer(function(input, output, session) {
 
   ##### Intra-day Module
@@ -112,58 +123,33 @@ shinyServer(function(input, output, session) {
   # Download Security Daily Files
   load(paste0(Sys.getenv("USERPROFILE"),"\\Callodine Capital Management, LP\\Main - Documents\\TWOOD-Bloomberg\\MSFS_Data.Rda"))
 
-  #####
-  #Set Input for Date Range
-  observeEvent(input$buttonMTD, {
-    updateDateRangeInput(
-      session,
-      "dateRange",
-      start = floor_date(max(data.dailysec$Date), "month"),
-      end = max(data.dailysec$Date))})
-  observeEvent(input$button1M, {
-    updateDateRangeInput(
-      session,
-      "dateRange",
-      start = floor_date(max(data.dailysec$Date) %m-% months(1) + 1),
-      end = max(data.dailysec$Date))})
-  observeEvent(input$buttonQTD, {
-    updateDateRangeInput(
-      session,
-      "dateRange",
-      start = floor_date(max(data.dailysec$Date), 'quarter'),
-      end = max(data.dailysec$Date))})
-  observeEvent(input$buttonYTD, {
-    updateDateRangeInput(
-      session,
-      "dateRange",
-      start = floor_date(max(data.dailysec$Date), 'year'),
-      end = max(data.dailysec$Date))})
-  observeEvent(input$button1Y, {
-    updateDateRangeInput(
-      session,
-      "dateRange",
-      start = floor_date(max(data.dailysec$Date) %m-% years(1) + 1),
-      end = max(data.dailysec$Date))})
-  observeEvent(input$buttonITD, {
-    updateDateRangeInput(
-      session,
-      "dateRange",
-      start = floor_date(min(data.dailysec$Date)),
-      end = max(data.dailysec$Date))})
 
-  date.start <- reactive(as.character(input$dateRange[[1]]))
-  date.end <- reactive(as.character(input$dateRange[[2]]))
+  # Performance Summary Tab ####################################################
+  .psumUpdateRange <- function(x, session){
+    updateDateRangeInput(
+      session,
+      "dateRange.psum",
+      start = setDateButton(x),
+      end = Sys.Date() -1)}
 
-  #####
+  observeEvent(input$buttonMTD.psum, {.psumUpdateRange("MTD", session)})
+  observeEvent(input$button1M.psum, {.psumUpdateRange("1M", session)})
+  observeEvent(input$buttonQTD.psum, {.psumUpdateRange("QTD", session)})
+  observeEvent(input$buttonYTD.psum, {.psumUpdateRange("YTD", session)})
+  observeEvent(input$button1Y.psum, {.psumUpdateRange("1Y", session)})
+  observeEvent(input$buttonITD.psum, {.psumUpdateRange("ITD", session)})
+
+  date.start.psum <- reactive(as.character(input$dateRange.psum[[1]]))
+  date.end.psum <- reactive(as.character(input$dateRange.psum[[2]]))
+
   # Calculate Performance
-  data.portreturn <- reactive({CalcAggMetrics(data.dailysec, date.start(), date.end())})
-  data.lsreturn <- reactive({CalcAggMetrics(data.dailysec, date.start(), date.end(), col.group = "L/S Exp", filter.sec = T)})
-  data.gicsreturn <- reactive({CalcAggMetrics(data.dailysec, date.start(), date.end(), col.group = c("Sector (Time Based)"), filter.sec = T)})
-  data.lsgicreturn <- reactive({CalcAggMetrics(data.dailysec, date.start(), date.end(), col.group = c("L/S Exp", "Sector (Time Based)"), filter.sec = T)})
-  data.spyreturn <- reactive({.tq_get_return(x = "^SP500TR", get = "stock.prices", complete_cases = T, from = date.start(), to = date.end())})
-  data.dvyreturn <- reactive({.tq_get_return(x = "dvy",      get = "stock.prices", complete_cases = T, from = date.start(), to = date.end())})
+  data.portreturn <- reactive({CalcAggMetrics(data.dailysec, date.start.psum(), date.end.psum())})
+  data.lsreturn <- reactive({CalcAggMetrics(data.dailysec, date.start.psum(), date.end.psum(), col.group = "L/S Exp", filter.sec = T)})
+  data.gicsreturn <- reactive({CalcAggMetrics(data.dailysec, date.start.psum(), date.end.psum(), col.group = c("Sector (Time Based)"), filter.sec = T)})
+  data.lsgicreturn <- reactive({CalcAggMetrics(data.dailysec, date.start.psum(), date.end.psum(), col.group = c("L/S Exp", "Sector (Time Based)"), filter.sec = T)})
+  data.spyreturn <- reactive({.tq_get_return(x = "^SP500TR", get = "stock.prices", complete_cases = T, from = date.start.psum(), to = date.end.psum())})
+  data.dvyreturn <- reactive({.tq_get_return(x = "dvy",      get = "stock.prices", complete_cases = T, from = date.start.psum(), to = date.end.psum())})
 
-  #####
   # Summary Table
   data.tableSummary <- reactive({
     full_join(
@@ -210,8 +196,7 @@ shinyServer(function(input, output, session) {
         `S` = "Short Exp") %>%
       gt_theme_538()})
 
-  #####
-  # Plot Cumulative Return
+  # Plot Return Charts
   output$chartCumRet <- renderPlotly({
     plot_ly() %>%
       add_trace(
@@ -358,9 +343,55 @@ shinyServer(function(input, output, session) {
           yanchor = "top",
           y = 100,
           automargin = T))})
+  output$chartYearReturn <- renderPlotly({
+    plot_ly() %>%
+      add_trace(
+        data = data.portreturn()$data %>%
+          group_by(`year` = lubridate::floor_date(`date`, "year")) %>%
+          summarize(`return` = prod(1+`return.daily`) -1),
+        x = ~ `year`,
+        y = ~ `return`,
+        name = "Portfolio Monthly Return",
+        type = "bar",
+        marker = list(color = "rgb(0,47,86)"),
+        text) %>%
+      add_trace(
+        data = data.spyreturn() %>%
+          group_by(`year` = lubridate::floor_date(`date`, "year")) %>%
+          summarize(`return` = prod(1+`return.daily`)-1),
+        x = ~ `year`,
+        y = ~ `return`,
+        name = "S&P 500 Return",
+        type = "bar",
+        marker = list(color = "rgb(44,132,134)"),
+        text) %>%
+      add_trace(
+        data = data.dvyreturn() %>%
+          group_by(`year` = lubridate::floor_date(`date`, "year")) %>%
+          summarize(`return` = prod(1+`return.daily`)-1),
+        x = ~ `year`,
+        y = ~ `return`,
+        name = "DVY Return",
+        type = "bar",
+        marker = list(color = "rgb(165,165,165)"),
+        text) %>%
+      layout(
+        xaxis = list(
+          title = "",
+          #dtick = "Y1",
+          tickformat="%Y"),
+        yaxis = list(
+          title = "",
+          tickformat = ".1%",
+          hoverformat = ".2%"),
+        legend = list(
+          orientation = "h",
+          xanchor = "center",
+          x = .5,
+          yanchor = "top",
+          y = 100,
+          automargin = T))})
 
-
-  #####
   # Sector Summary Table
   output$sectableSummary <- gt::render_gt({
     data.gicsreturn()$summary %>%
@@ -385,6 +416,7 @@ shinyServer(function(input, output, session) {
           cell_text(weight = "bold"))) %>%
       opt_row_striping() %>%
       tab_options(row.striping.background_color = "#dddddd")})
+
   # Long-Short Contribution Chart
   output$chartLSCont <- plotly::renderPlotly({
     data.lsreturn()$data %>%
@@ -422,10 +454,30 @@ shinyServer(function(input, output, session) {
           y = 100,
           automargin = T))})
 
-  #####
+  # Exposure Tab ###############################################################
   # Plot Exposure
+  .pexpUpdateRange <- function(x, session){
+    updateDateRangeInput(
+      session,
+      "dateRange.pexp",
+      start = setDateButton(x),
+      end = Sys.Date() -1)}
+
+  observeEvent(input$buttonMTD.pexp, {.pexpUpdateRange("MTD", session)})
+  observeEvent(input$button1M.pexp, {.pexpUpdateRange("1M", session)})
+  observeEvent(input$buttonQTD.pexp, {.pexpUpdateRange("QTD", session)})
+  observeEvent(input$buttonYTD.pexp, {.pexpUpdateRange("YTD", session)})
+  observeEvent(input$button1Y.pexp, {.pexpUpdateRange("1Y", session)})
+  observeEvent(input$buttonITD.pexp, {.pexpUpdateRange("ITD", session)})
+
+  date.start.pexp <- reactive(as.character(input$dateRange.pexp[[1]]))
+  date.end.pexp <- reactive(as.character(input$dateRange.pexp[[2]]))
+
+  # Calculate Performance
+  data.portreturn.pexp <- reactive({CalcAggMetrics(data.dailysec, date.start.pexp(), date.end.pexp())})
+
   output$chartGrossExp <- renderPlotly({
-    data.portreturn()$data %>%
+    data.portreturn.pexp()$data %>%
       select(`date`, `mkt.val.gross.pct`) %>%
       plot_ly() %>%
       add_trace(
@@ -452,7 +504,7 @@ shinyServer(function(input, output, session) {
           y = 100,
           automargin = T))})
   output$chartNetExp <- renderPlotly({
-    data.portreturn()$data %>%
+    data.portreturn.pexp()$data %>%
       select(`date`, `mkt.val.net.pct`) %>%
       plot_ly() %>%
       add_trace(
@@ -478,5 +530,47 @@ shinyServer(function(input, output, session) {
           yanchor = "top",
           y = 100,
           automargin = T))})
+
+  # Sector Exposure Tab ########################################################
+  data.sectorweight <-
+    AggSec2Group(
+      data.dailysec,
+      max(data.dailysec$Date),
+      max(data.dailysec$Date),
+      col.group = c("L/S Exp", "Sector (Time Based)"),
+      filter.sec = T) %>%
+    group_by(`L/S Exp`) %>%
+    mutate(`port.exp` = sum(`mkt.val.gross.pct`)) %>%
+    group_by(`L/S Exp`, `Sector (Time Based)`) %>%
+    transmute(`Exp` = `mkt.val.gross.pct` / `port.exp`) %>%
+    pivot_wider(names_from = `L/S Exp`, values_from = `Exp`)
+
+  output$chartSectorWeightSnapshot <- renderPlotly({
+    data.sectorweight %>%
+      plot_ly() %>%
+      add_pie(
+        labels = ~`Sector (Time Based)`,
+        values = ~`L`,
+        domain = list(row = 0, column = 0),
+        name = "Long Exposure",
+        hole = 0.5,
+        title = "Long Exposure",
+        textinfo = "none",
+        hovertemplate = paste('<i>%{label}</i>','<br><b>Weight</b>: %{percent}<br>'),
+        marker = list(colors = viridisLite::viridis(13))) %>%
+      add_pie(
+        labels = ~`Sector (Time Based)`,
+        values = ~`S`,
+        domain = list(row = 0, column = 1),
+        name = "Short Exposure",
+        hole = 0.5,
+        title = "Short Exposure",
+        textinfo = "none",
+        hovertemplate = paste('<i>%{label}</i>','<br><b>Weight</b>: %{percent}<br>')) %>%
+      layout(
+        grid = list(rows = 1, columns = 2),
+        legend = list(orientation = "h",
+                      xanchor = "center",
+                      x = 0.5))})
 
 })
