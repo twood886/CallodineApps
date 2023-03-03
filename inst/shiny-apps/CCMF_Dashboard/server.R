@@ -50,6 +50,10 @@ shinyServer(function(input, output, session) {
     timer.min()
     calcReturnsIntraday(data.holdings())})
 
+  data.spx <- reactive({
+    timer.min()
+    calcSecReturnIntraday("SPY")})
+
   # Generate Plot for Intra-day Return
   output$idayPlot <- renderPlotly({
     data.returns() %>%
@@ -77,6 +81,15 @@ shinyServer(function(input, output, session) {
         type = "scatter",
         mode = "lines",
         line = list(color = "rgb(0,47,86)"),
+        text) %>%
+      add_trace(
+        data = data.spx(),
+        x = ~ `date`,
+        y = ~ `return`,
+        name = "S&P 500 Return",
+        type = "scatter",
+        mode = "lines",
+        line = list(color = "rgb(44,132,134)"),
         text) %>%
       layout(
         yaxis = list(
@@ -118,10 +131,30 @@ shinyServer(function(input, output, session) {
         decimals = 0) %>%
       gt_theme_538()})
 
+  output$idayTableSecContr <- gt::render_gt({
+    data.returns() %>%
+      mutate(
+        `description` = map_chr(`data`, \(x) first(x$Description)),
+        `return` = map_dbl(`return.intraday`, \(x) last(x$return)),
+        `contribution` = map_dbl(`return.intraday`, \(x) last(x$contr)),
+        `price` = map_dbl(`price.intraday`, \(x) last(x$close)),
+        `gl` = map_dbl(`return.intraday`, \(x) last(x$gl))) %>%
+      mutate(`weight` = `NMV.start` / `NAV.start`) %>%
+      mutate(`contribution` = `contribution` * 10000) %>%
+      select(`symbol.yahoo`, `description`, `sector`, `weight`, `price`, `return`, `contribution`) %>%
+      group_by(`sector`) %>%
+      arrange(`sector`, desc(`contribution`)) %>%
+      gt() %>%
+      fmt_percent(columns = c(`weight`, `return`, decimals = 0)) %>%
+      fmt_currency(columns = c(`price`)) %>%
+      fmt_integer(columns = c(`contribution`)) %>%
+      cols_label(`symbol.yahoo` = "") %>%
+      gt_theme_538()})
+
 
   #####
   # Download Security Daily Files
-  load(paste0(Sys.getenv("USERPROFILE"),"\\Callodine Capital Management, LP\\Main - Documents\\TWOOD-Bloomberg\\MSFS_Data.Rda"))
+  load(paste0(Sys.getenv("USERPROFILE"),"\\Callodine Capital Management, LP\\Data - Documents\\CCMF_Dashboard\\MSFS_Data.Rda"))
 
 
   # Performance Summary Tab ####################################################
@@ -532,21 +565,41 @@ shinyServer(function(input, output, session) {
           automargin = T))})
 
   # Sector Exposure Tab ########################################################
-  data.sectorweight <-
+
+  data.sectorweightsnap <- reactive({
     AggSec2Group(
       data.dailysec,
-      max(data.dailysec$Date),
-      max(data.dailysec$Date),
+      min(input$SectorExpSlider, max(data.dailysec$Date)) - 7,
+      min(input$SectorExpSlider, max(data.dailysec$Date)),
       col.group = c("L/S Exp", "Sector (Time Based)"),
       filter.sec = T) %>%
+    filter(`date` == max(`date`)) %>%
     group_by(`L/S Exp`) %>%
     mutate(`port.exp` = sum(`mkt.val.gross.pct`)) %>%
     group_by(`L/S Exp`, `Sector (Time Based)`) %>%
     transmute(`Exp` = `mkt.val.gross.pct` / `port.exp`) %>%
-    pivot_wider(names_from = `L/S Exp`, values_from = `Exp`)
+    pivot_wider(names_from = `L/S Exp`, values_from = `Exp`)})
+
+  # data.port <-
+  #   AggSec2Group(
+  #     data.dailysec,
+  #     min(data.dailysec$Date),
+  #     max(data.dailysec$Date))
+  #
+  # data.sectorweight <-
+  #   AggSec2Group(
+  #     data.dailysec,
+  #     min(data.dailysec$Date),
+  #     max(data.dailysec$Date),
+  #     col.group = c("Sector (Time Based)"),
+  #     filter.sec = T) %>%
+  #
+  #   select(`date`, `Sector (Time Based)`, `net.assets.end`) %>%
+
+
 
   output$chartSectorWeightSnapshot <- renderPlotly({
-    data.sectorweight %>%
+    data.sectorweightsnap() %>%
       plot_ly() %>%
       add_pie(
         labels = ~`Sector (Time Based)`,

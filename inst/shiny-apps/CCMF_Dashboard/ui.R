@@ -78,15 +78,20 @@ shinyUI(
 
         tabItem(
           tabName = "intraday",
-          h2("Intraday Return Summary"),
+          h2("Intra-Day Return Summary"),
 
           fluidRow(
             box(
               title = "Intra-Day Return Chart",
               plotlyOutput("idayPlot")),
             box(
-              title = "Intra-day Sector L/S Contribution",
-              gt_output("idayTableLS")))),
+              title = "Intra-Day Sector L/S Contribution",
+              gt_output("idayTableLS"))),
+          fluidRow(
+            box(
+              title = "Intra-Day Security Contribution",
+              gt_output("idayTableSecContr"))
+          )),
 
         tabItem(
           tabName = "psummary",
@@ -169,7 +174,16 @@ shinyUI(
           h2("Sector Exposure"),
           fluidRow(
             box(
-              width = 12,
+              width = 3,
+              sliderInput(
+                "SectorExpSlider",
+                label = "Select Date",
+                min = as.Date("2018-07-02"),
+                max = Sys.Date() -1,
+                value = Sys.Date() -1,
+                timeFormat = "%b-%d-%y")),
+            box(
+              width = 9,
               title = "Sector Exposure - Snapshot",
               plotlyOutput("chartSectorWeightSnapshot"))))
 

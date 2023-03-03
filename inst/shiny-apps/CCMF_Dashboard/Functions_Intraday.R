@@ -166,6 +166,8 @@ getCCMFholdings <- function(
     unnest(`symbol.yahoo`)
 }
 
+
+
 #' @title Calculate Intraday Returns
 #' @description Calculated Intraday Returns
 #' @import tidyverse
@@ -201,4 +203,21 @@ calcReturnsIntraday <- function(data.holdings){
             `gl` = (`close` * .b) - (.b * .c),
             `contr` = `gl` / .d) %>%
           select(`date`, `return`, `gl`, `contr`)))
+}
+
+#' @title Calculate Intraday Return for Security
+#' @description Calculate Intraday Return for Security
+#' @import tidyverse
+#' @param sec.id
+calcSecReturnIntraday <- function(sec.id){
+
+  price.intraday <- get_history_v2(`sec.id`)
+  price.start <- get_history_v2(`sec.id`,  period = "2d", interval = "1d") %>%
+    select(`close`) %>%
+    first() %>%
+    pull()
+
+  return.intraday <- price.intraday %>%
+    mutate(`return` = `close` / price.start - 1)
+
 }
