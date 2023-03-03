@@ -149,7 +149,13 @@ shinyServer(function(input, output, session) {
       fmt_currency(columns = c(`price`)) %>%
       fmt_integer(columns = c(`contribution`)) %>%
       cols_label(`symbol.yahoo` = "") %>%
-      gt_theme_538()})
+      gt_theme_538() %>%
+      data_color(
+        columns = c(`contribution`),
+        colors = col_numeric(
+          c("#B3000C", "#FFFFFF", "#00B32C"),
+          domain = c(-20, 0, 20),
+          alpha = 1))})
 
 
   #####
