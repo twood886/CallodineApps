@@ -181,7 +181,3 @@ CalcAggMetrics <- function(
   }
   return(data.agg)
 }
-
-
-
-

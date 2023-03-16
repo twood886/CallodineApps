@@ -61,8 +61,10 @@ get_history_v2 <- function(
     magrittr::use_series(quote) %>%
     magrittr::extract2(1)
 
+  timezone <- data$meta$exchangeTimezoneName
+
   result <- data.frame(
-    date =  lubridate::with_tz(as_datetime(unlist(data$timestamp)), tz="EST"),
+    date =  lubridate::with_tz(as_datetime(unlist(data$timestamp)), tz=timezone),
     close = suppressWarnings(na.locf(unlist(as.numeric(as.character(indicators$close))))))
 
 
