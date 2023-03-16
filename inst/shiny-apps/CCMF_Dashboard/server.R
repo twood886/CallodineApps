@@ -70,7 +70,7 @@ shinyServer(function(input, output, session) {
       arrange(`date`) %>%
       slice(-1) %>%
       add_row(
-        `date` = as.POSIXct(paste(Sys.Date(), "09:29:00"),tz="EST"),
+        `date` = as.POSIXct(paste(Sys.Date(), "09:29:00")),
         `return` = 0,
         .before = 1) %>%
       plot_ly() %>%
