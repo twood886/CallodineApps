@@ -139,7 +139,7 @@ getCCMFholdings <- function(
     fileloc = paste0(
       Sys.getenv("USERPROFILE"),
       "\\",
-      "Callodine Capital Management, LP\\Main - Documents\\TWOOD-Bloomberg\\",
+      "Callodine Capital Management, LP\\Investing - Documents\\",
       "Daily_Trade_Report\\Daily_Trade_Report_Macro.xlsm"),
     sheet = "Holdings",
     skip = 10){
