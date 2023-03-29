@@ -167,7 +167,11 @@ shinyUI(
               plotlyOutput("chartGrossExp")),
             box(
               title = "Net Portfolio Exposure",
-              plotlyOutput("chartNetExp")))),
+              plotlyOutput("chartNetExp"))),
+          fluidRow(
+            box(
+              title = "Performance vs Net Adj S&P 500",
+              plotlyOutput("netAdjPerf")))),
 
         tabItem(
           tabName = "sectorexp",

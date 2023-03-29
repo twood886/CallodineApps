@@ -514,6 +514,7 @@ shinyServer(function(input, output, session) {
 
   # Calculate Performance
   data.portreturn.pexp <- reactive({CalcAggMetrics(data.dailysec, date.start.pexp(), date.end.pexp())})
+  data.spyreturn.pexp <- reactive({.tq_get_return(x = "^SP500TR", get = "stock.prices", complete_cases = T, from = date.start.pexp(), to = date.end.pexp())})
 
   output$chartGrossExp <- renderPlotly({
     data.portreturn.pexp()$data %>%
@@ -542,6 +543,7 @@ shinyServer(function(input, output, session) {
           yanchor = "top",
           y = 100,
           automargin = T))})
+
   output$chartNetExp <- renderPlotly({
     data.portreturn.pexp()$data %>%
       select(`date`, `mkt.val.net.pct`) %>%
@@ -562,6 +564,49 @@ shinyServer(function(input, output, session) {
           side = "left",
           tickformat = "0%",
           hoverformat = ".1%"),
+        legend = list(
+          orientation = "h",
+          xanchor = "center",
+          x = .5,
+          yanchor = "top",
+          y = 100,
+          automargin = T))})
+
+  output$netAdjPerf <- renderPlotly({
+    plot_ly() %>%
+      add_trace(
+        data = data.portreturn.pexp()$data,
+        x = ~ `date`,
+        y = ~ `return.cumulative`,
+        name = "Portfolio Monthly Return",
+        type = "scatter",
+        mode = "lines",
+        line = list(color = "rgb(0,47,86)"),
+        text) %>%
+      add_trace(
+        data =
+          inner_join(
+            data.spyreturn.pexp(),
+            data.portreturn.pexp()$data %>%
+              select(`date`, `mkt.val.net.pct`),
+            by = "date") %>%
+          mutate(
+            `return.daily` = `return.daily` * `mkt.val.net.pct`,
+            `return.cumulative` = cumprod(1 + `return.daily`) - 1),
+        x = ~ `date`,
+        y = ~ `return.cumulative`,
+        name = "S&P 500 Return (CCMF Net Adj)",
+        type = "scatter",
+        mode = "lines",
+        line = list(color = "rgb(44,132,134)"),
+        text) %>%
+      layout(
+        xaxis = list(
+          title = ""),
+        yaxis = list(
+          title = "",
+          tickformat = ".1%",
+          hoverformat = ".2%"),
         legend = list(
           orientation = "h",
           xanchor = "center",
