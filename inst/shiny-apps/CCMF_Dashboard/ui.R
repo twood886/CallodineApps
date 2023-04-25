@@ -50,15 +50,11 @@ shinyUI(
         menuItem(
           "Intraday Return",
           tabName = "intraday",
-          icon = icon("signal"),
-          badgeLabel = "new",
-          badgeColor = "green"),
+          icon = icon("signal")),
         menuItem(
           "Performance Summary",
           tabName = "psummary",
-          icon = icon("signal"),
-          badgeLabel = "new",
-          badgeColor = "green"),
+          icon = icon("signal")),
         menuItem(
           "Portfolio Exposure",
           tabName = "exp",
@@ -68,9 +64,7 @@ shinyUI(
         menuItem(
           "Sector Exposure",
           tabName = "sectorexp",
-          icon = icon("th"),
-          badgeLabel = "new",
-          badgeColor = "green"))),
+          icon = icon("th")))),
 
     dashboardBody(
 
@@ -90,7 +84,10 @@ shinyUI(
           fluidRow(
             box(
               title = "Intra-Day Security Contribution",
-              gt_output("idayTableSecContr"))
+              gt_output("idayTableSecContr")),
+            box(
+              title = "Intra-Day Trades",
+              gt_output("idayTableTrades")),
           )),
 
         tabItem(

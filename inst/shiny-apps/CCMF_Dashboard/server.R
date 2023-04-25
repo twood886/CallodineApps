@@ -35,7 +35,7 @@ setDateButton <- function(x){
 
 shinyServer(function(input, output, session) {
 
-  ##### Intra-day Module
+  # Intra-Day Module Tab #######################################################
   # Set Timer for Auto Data Updates
   timer.min <- reactiveTimer(120000)
   timer.10min <- reactiveTimer(600000)
@@ -45,14 +45,19 @@ shinyServer(function(input, output, session) {
     timer.10min()
     getCCMFholdings()})
 
+  # Import Daily Trades
+  data.trades <- reactive({
+    timer.10min
+    getCCMFTrades()})
+
   # Calculate Returns every 2 Min for Intra-day
   data.returns <- reactive({
     timer.min()
     calcReturnsIntraday(data.holdings())})
-
   data.spx <- reactive({
     timer.min()
     calcSecReturnIntraday("SPY")})
+
 
   # Generate Plot for Intra-day Return
   output$idayPlot <- renderPlotly({
@@ -130,7 +135,7 @@ shinyServer(function(input, output, session) {
         formatter = fmt_number,
         decimals = 0) %>%
       gt_theme_538()})
-
+  # Generate Intra-day Sector Contribution Table
   output$idayTableSecContr <- gt::render_gt({
     data.returns() %>%
       mutate(
@@ -157,9 +162,15 @@ shinyServer(function(input, output, session) {
           domain = c(-20, 0, 20),
           alpha = 1))})
 
+  # Generate Intra-dat Trade Table
+  output$idayTableTrades <- gt::render_gt({
+    data.trades() %>%
+      select(`Ticker`, `Description`, `Txn Type`, `Traded Quantity`, `Order Remaining Quantity`, `Trade Price`) %>%
+      gt() %>%
+      fmt_currency(columns = c(`Trade Price`)) %>%
+      gt_theme_538()})
 
-  #####
-  # Download Security Daily Files
+  # Download Security Daily Files ##############################################
   load(paste0(Sys.getenv("USERPROFILE"),"\\Callodine Capital Management, LP\\Investing - Documents\\Dashboard\\MSFS_Data.Rda"))
 
 
@@ -242,7 +253,7 @@ shinyServer(function(input, output, session) {
         data = data.portreturn()$data,
         x = ~ `date`,
         y = ~ `return.cumulative`,
-        name = "Portfolio Monthly Return",
+        name = "Portfolio Return",
         type = "scatter",
         mode = "lines",
         line = list(color = "rgb(0,47,86)"),
@@ -287,7 +298,7 @@ shinyServer(function(input, output, session) {
           summarize(`return` = prod(1+`return.daily`) -1),
         x = ~ `week`,
         y = ~ `return`,
-        name = "Portfolio Monthly Return",
+        name = "Portfolio Weekly Return",
         type = "bar",
         #mode = "lines",
         marker = list(color = "rgb(0,47,86)"),
@@ -298,7 +309,7 @@ shinyServer(function(input, output, session) {
           summarize(`return` = prod(1+`return.daily`)-1),
         x = ~ `week`,
         y = ~ `return`,
-        name = "S&P 500 Return",
+        name = "S&P 500 Weekly Return",
         type = "bar",
         #mode = "lines",
         marker = list(color = "rgb(44,132,134)"),
@@ -309,7 +320,7 @@ shinyServer(function(input, output, session) {
           summarize(`return` = prod(1+`return.daily`)-1),
         x = ~ `week`,
         y = ~ `return`,
-        name = "DVY Return",
+        name = "DVY Weekly Return",
         type = "bar",
         #mode = "lines",
         marker = list(color = "rgb(165,165,165)"),
@@ -350,7 +361,7 @@ shinyServer(function(input, output, session) {
           summarize(`return` = prod(1+`return.daily`)-1),
         x = ~ `month`,
         y = ~ `return`,
-        name = "S&P 500 Return",
+        name = "S&P 500 Monthly Return",
         type = "bar",
         #mode = "lines",
         marker = list(color = "rgb(44,132,134)"),
@@ -361,7 +372,7 @@ shinyServer(function(input, output, session) {
           summarize(`return` = prod(1+`return.daily`)-1),
         x = ~ `month`,
         y = ~ `return`,
-        name = "DVY Return",
+        name = "DVY Monthly Return",
         type = "bar",
         #mode = "lines",
         marker = list(color = "rgb(165,165,165)"),
@@ -390,7 +401,7 @@ shinyServer(function(input, output, session) {
           summarize(`return` = prod(1+`return.daily`) -1),
         x = ~ `year`,
         y = ~ `return`,
-        name = "Portfolio Monthly Return",
+        name = "Portfolio Annual Return",
         type = "bar",
         marker = list(color = "rgb(0,47,86)"),
         text) %>%
@@ -400,7 +411,7 @@ shinyServer(function(input, output, session) {
           summarize(`return` = prod(1+`return.daily`)-1),
         x = ~ `year`,
         y = ~ `return`,
-        name = "S&P 500 Return",
+        name = "S&P 500 Annual Return",
         type = "bar",
         marker = list(color = "rgb(44,132,134)"),
         text) %>%
@@ -410,7 +421,7 @@ shinyServer(function(input, output, session) {
           summarize(`return` = prod(1+`return.daily`)-1),
         x = ~ `year`,
         y = ~ `return`,
-        name = "DVY Return",
+        name = "DVY Annual Return",
         type = "bar",
         marker = list(color = "rgb(165,165,165)"),
         text) %>%
@@ -578,7 +589,7 @@ shinyServer(function(input, output, session) {
         data = data.portreturn.pexp()$data,
         x = ~ `date`,
         y = ~ `return.cumulative`,
-        name = "Portfolio Monthly Return",
+        name = "Portfolio Return",
         type = "scatter",
         mode = "lines",
         line = list(color = "rgb(0,47,86)"),

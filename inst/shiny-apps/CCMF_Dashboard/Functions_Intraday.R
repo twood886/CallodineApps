@@ -168,7 +168,31 @@ getCCMFholdings <- function(
     unnest(`symbol.yahoo`)
 }
 
+#' @title Read Callodine Trades
+#' @description Read in Callodine CCMF Trades from Trade Email File
+#' @import tidyverse
+#' @import readxl
+#' @param fileloc
+#' @param sheet
+#' @param skip
+#' @export
+getCCMFTrades <- function(
+    fileloc = paste0(
+      Sys.getenv("USERPROFILE"),
+      "\\",
+      "Callodine Capital Management, LP\\Investing - Documents\\",
+      "Daily_Trade_Report\\Daily_Trade_Report_Macro.xlsm"),
+    sheet = "Enfusion",
+    skip = 10){
 
+  readxl::read_excel(
+    fileloc,
+    sheet = sheet,
+    skip = skip) %>%
+    filter(`Trade Date` == Sys.Date()) %>%
+    mutate(`symbol.yahoo` = map(`Ticker`, validate_symbol)) %>%
+    unnest(`symbol.yahoo`)
+}
 
 #' @title Calculate Intraday Returns
 #' @description Calculated Intraday Returns
@@ -223,3 +247,5 @@ calcSecReturnIntraday <- function(sec.id){
     mutate(`return` = `close` / price.start - 1)
 
 }
+
+
