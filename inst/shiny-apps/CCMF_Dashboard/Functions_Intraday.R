@@ -140,7 +140,7 @@ getCCMFholdings <- function(
       Sys.getenv("USERPROFILE"),
       "\\",
       "Callodine Capital Management, LP\\Investing - Documents\\",
-      "Daily_Trade_Report\\Daily_Trade_Report_Macro.xlsm"),
+      "Daily_Trade_Report\\Daily_Trade_Report_Macro_v2.xlsm"),
     sheet = "Holdings",
     skip = 10){
 
@@ -181,7 +181,7 @@ getCCMFTrades <- function(
       Sys.getenv("USERPROFILE"),
       "\\",
       "Callodine Capital Management, LP\\Investing - Documents\\",
-      "Daily_Trade_Report\\Daily_Trade_Report_Macro.xlsm"),
+      "Daily_Trade_Report\\Daily_Trade_Report_Macro_v2.xlsm"),
     sheet = "Enfusion",
     skip = 10){
 
